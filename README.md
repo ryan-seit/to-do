@@ -1,1 +1,3 @@
-# to-do
+# Todo App
+
+Made using `create-react-app`
