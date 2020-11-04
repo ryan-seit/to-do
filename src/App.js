@@ -1,88 +1,110 @@
 import "./App.css";
-import React, { useState, useReducer } from "react";
-// import { findAllByTestId } from "@testing-library/react";
+import React, { useState, useReducer, useEffect } from "react";
+import axios from "./axios-config";
 
 // To do component, if object `isDone` is true, check box
-const Todo = ({ todo, index, isDone, deleteTodo }) => {
-	const [content, setContent] = useState([todo.content]);
-	let edit = "false";
-
-	const handleDoubleClick = e => {
-		edit = "true";
-		e.preventDefault();
-		setContent(e.target.value);
+const Todo = ({
+	content,
+	id,
+	isDone,
+	markComplete,
+	deleteTodo,
+	todos,
+	setTodos,
+}) => {
+	const handleOnChange = (text, id) => {
+		const newTodos = [...todos];
+		let updatedContent = text;
+		newTodos.forEach(todo => {
+			if (todo.id === id) {
+				todo.content = updatedContent;
+			}
+			axios
+				.put(`/${id}`, {
+					content: todo.content,
+				})
+				.then(res => console.log(res))
+				.catch(err => console.error(err));
+		});
+		setTodos(newTodos);
 	};
 
-	// console.log("Todo component", content);
 	return (
-		<div
-			className='todo'
-			style={{ textDecoration: todo.isDone ? "line-through" : "" }}
-		>
+		<div className='entry todo-list__entry' key={id}>
 			<input
 				type='checkbox'
-				id={todo.id}
+				className='checkbox entry__checkbox'
+				id={id}
 				name={content}
-				checked={todo.isDone}
-				onChange={() => isDone(index)}
+				checked={isDone}
+				onChange={() => markComplete(id, isDone)}
 			/>
-			<label
+			<input
+				type='text'
+				className='label entry__label'
 				value={content}
-				contentEditable={edit}
-				onDoubleClick={e => handleDoubleClick(e)}
-				className='content'
-			>
-				{content}
-			</label>
-			<button onClick={() => deleteTodo(index)}>X</button>
+				style={{ textDecoration: isDone === true ? "line-through" : "" }}
+				onChange={e => handleOnChange(e.target.value, id)}
+			/>
+			<button onClick={() => deleteTodo(id)} className='button entry__button'>
+				x
+			</button>
 		</div>
 	);
 };
 
-// New todo form component
-const TodoInput = ({ addTodo }) => {
+const TodoInput = props => {
 	const [value, setValue] = useState("");
 	const handleSubmit = event => {
 		event.preventDefault();
 		if (!value) return;
-		addTodo(value);
+		axios
+			.post("", {
+				content: value.toString(),
+				isDone: false,
+			})
+			.then(res => {
+				props.addTodo(res.data);
+				console.log("POST RESPONSE", res);
+			})
+			.catch(err => {
+				console.log("POST ERROR", err);
+			});
 		setValue("");
 	};
 
 	return (
 		<form onSubmit={handleSubmit}>
+			<button
+				type='button'
+				className='button todo-form__button'
+				id='chevron'
+				onClick={props.allDone}
+			>
+				>
+			</button>
 			<input
 				type='text'
-				className='input'
+				className='input todo-header__input'
 				value={value}
 				placeholder='What needs to be done?'
-				onChange={event => setValue(event.target.value)}
+				onChange={e => setValue(e.target.value)}
 			/>
 		</form>
 	);
 };
 
 function App() {
-	// Testing state (remove for production)
-	const [todos, setTodos] = useState([
-		{
-			id: 101,
-			content: "To Do Item 1",
-			isDone: false,
-		},
-		{
-			id: 102,
-			content: "To Do Item 2",
-			isDone: false,
-		},
-		{
-			id: 103,
-			content: "To Do Item 3",
-			isDone: true,
-		},
-	]);
+	const [todos, setTodos] = useState([]);
 
-	console.log("todos", todos);
+	// Fetch todos from API
+	useEffect(() => {
+		const fetchData = async () => {
+			const res = await axios();
+			setTodos(res.data);
+		};
+		fetchData().catch(err => console.error(err));
+	}, []);
 
 	// Filter todos by isDone value
 	const filterReducer = (state, action) => {
@@ -118,33 +140,52 @@ function App() {
 		return false;
 	});
 
+	// Filter: show all todos
 	const handleShowAll = () => {
 		dispatchFilter({ type: "SHOW_ALL" });
 	};
 
+	// Filter: show all active todos
 	const handleShowActive = () => {
 		dispatchFilter({ type: "SHOW_ACTIVE" });
 	};
 
+	// Filter: show all completed todos
 	const handleShowCompleted = () => {
 		dispatchFilter({ type: "SHOW_COMPLETED" });
 	};
 
-	// Generate random number for new objects id field
-	let randomNum = Math.floor(Math.random() * 100 + 1);
-
 	// Create todo object
-	const addTodo = content => {
-		const newTodos = [...todos, { id: randomNum, content, isDone: false }];
+	const addTodo = data => {
+		const newTodos = [
+			...todos,
+			{ id: data.id, content: data.content, isDone: data.isDone },
+		];
 		setTodos(newTodos);
 	};
 
 	// TODO: Edit todo object
-	// const editTodo = content => {
-	// 	const newTodos = [...todos]
-	// }
+	const editTodo = (id, content) => {
+		const newTodos = [...todos];
+		todos.forEach(todo => {
+			if (todo.id === id) {
+				todo.content = content;
+				axios
+					.put(`/${id}`, {
+						content: content.toString(),
+					})
+					.then(res => {
+						console.log("edit todo", res.data);
+					})
+					.catch(err => {
+						console.error(err);
+					});
+			}
+			setTodos(newTodos);
+		});
+	};
 
-	// Active todo count
+	// Active todo number
 	const activeTodoCount = () => {
 		let activeTodos = 0;
 		todos.forEach(todo => {
@@ -155,7 +196,7 @@ function App() {
 		return activeTodos;
 	};
 
-	// Completed todo count
+	// Toggle 'Clear Completed' button
 	const toggleClearCompleted = () => {
 		let completedTodos = 0;
 		todos.forEach(todo => {
@@ -171,32 +212,89 @@ function App() {
 	};
 
 	// Mark todo as complete
-	const isDone = index => {
+	const markComplete = (id, isDone) => {
 		const newTodos = [...todos];
-		newTodos[index].isDone = !newTodos[index].isDone;
-		setTodos(newTodos);
+		newTodos.forEach(todo => {
+			if (todo.id === id && todo.isDone !== true) {
+				axios
+					.put(`/${id}`, {
+						isDone: "true",
+					})
+					.then(res => {
+						console.log("PUT", res.data);
+						todo.isDone = true;
+						setTodos(newTodos);
+					})
+					.catch(err => console.error(err));
+			} else if (todo.id === id && todo.isDone !== false) {
+				axios
+					.put(`/${id}`, {
+						isDone: "false",
+					})
+					.then(res => {
+						console.log("PUT", res.data);
+						todo.isDone = false;
+						setTodos(newTodos);
+					})
+					.catch(err => console.error(err));
+			}
+		});
 	};
 
 	// Mark all todos as complete
-	const allDone = index => {
+	const allDone = () => {
 		const newTodos = [...todos];
-		newTodos.forEach(todo => (todo.isDone = true));
-		setTodos(newTodos);
+		newTodos.forEach(todo => {
+			if (todo.isDone !== true) {
+				axios
+					.put(`/${todo.id}`, {
+						isDone: "true",
+					})
+					.then(res => {
+						console.log("PUT", res.data);
+					})
+					.catch(err => console.error(err));
+			}
+			todo.isDone = true;
+			setTodos(newTodos);
+		});
 	};
 
 	// Delete todo object
-	const deleteTodo = index => {
-		const newTodos = [...todos];
-		newTodos.splice(index, 1);
-		setTodos(newTodos);
+	const deleteTodo = id => {
+		const newTodos = [];
+		todos.forEach(todo => {
+			if (todo.id !== id) {
+				newTodos.push(todo);
+			} else if (todo.id === id) {
+				axios
+					.delete(`/${id}`)
+					.then(res => {
+						console.log("deletetodo", res.data);
+						setTodos(newTodos);
+					})
+					.catch(err => {
+						console.error(err);
+					});
+			}
+		});
 	};
 
-	// Push active todos to new array, then update state with new array
+	// Clear all completed todos
 	const handleClearCompleted = () => {
 		const newTodos = [];
 		todos.forEach(todo => {
 			if (!todo.isDone) {
 				newTodos.push(todo);
+			} else if (todo.isDone) {
+				axios
+					.delete(`/${todo.id}`)
+					.then(res => {
+						console.log("deletetodo", res.data);
+					})
+					.catch(err => {
+						console.error(err);
+					});
 			}
 		});
 		setTodos(newTodos);
@@ -204,39 +302,56 @@ function App() {
 
 	return (
 		<div className='App'>
-			<div className='todo-header'>
+			<div className='title todo-header__title'>
 				<h1>todos</h1>
 			</div>
-			<button type='button' onClick={allDone}>
-				All
-			</button>
-			<TodoInput addTodo={addTodo} />
+			<TodoInput addTodo={addTodo} allDone={allDone} />
 			<div className='todo-list'>
-				{filteredTodos.map((todo, index) => (
+				{filteredTodos.map(todo => (
 					<Todo
-						key={index}
-						index={index}
-						todo={todo}
-						isDone={isDone}
-						deleteTodo={deleteTodo}
+						key={todo.id}
+						id={todo.id}
+						content={todo.content}
+						editTodo={e => editTodo(todo.id)}
+						isDone={todo.isDone}
+						markComplete={e => markComplete(todo.id)}
+						deleteTodo={e => deleteTodo(todo.id)}
+						todos={todos}
+						setTodos={setTodos}
 					/>
 				))}
 			</div>
-			<div>
-				{console.log(activeTodoCount())}
-				{console.log(toggleClearCompleted())}
-				{activeTodoCount()} items left
-				<button type='button' onClick={handleShowAll}>
+			<div className='todo-footer'>
+				<label className='label todo-footer__label'>
+					{activeTodoCount()} items left
+				</label>
+				<button
+					type='button'
+					className='button button-all todo-footer__button'
+					onClick={handleShowAll}
+				>
 					All
 				</button>
-				<button type='button' onClick={handleShowActive}>
+				<button
+					type='button'
+					className='button button-active todo-footer__button'
+					onClick={handleShowActive}
+				>
 					Active
 				</button>
-				<button type='button' onClick={handleShowCompleted}>
+				<button
+					type='button'
+					className='button button-completed todo-footer__button'
+					onClick={handleShowCompleted}
+				>
 					Completed
 				</button>
 				{toggleClearCompleted() ? (
-					<button type='button' onClick={handleClearCompleted}>
+					<button
+						type='button'
+						className='button button-clear todo-footer__button'
+						onClick={handleClearCompleted}
+					>
 						Clear Completed
 					</button>
 				) : null}

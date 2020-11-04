@@ -1,38 +1,154 @@
-.App {
+body {
+  height: 100vh;
   text-align: center;
+  font-family: Helvetica Neue;
+  background: #F5F5F5;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.title h1 {
+  font-style: normal;
+  font-weight: 100;
+  font-size: 100px;
+  line-height: 50px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+form, 
+.todo-list__entry, 
+.todo-list, .todo-footer {
+  margin: auto;
+  filter: drop-shadow(1px 5px 1px lightgray);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.todo-list__entry {
+  width: 626px;
+  height: 65px;
+  font-size: 24px;
+  line-height: 29px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+form, .todo-footer {
+  width: 626px;
+  height: 65px;
+  display: flex;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+form, .todo-list__entry, .todo-footer {
+  border: .5px solid lightgray;
+  background-color: white;
+}
+
+.todo-form__button {
+  width: 50px;
+  height: 65px;
+  align-content: flex-start;
+}
+
+.input, .input:placeholder-shown, .input:focus, textarea:focus {
+  outline: none;
+  align-content: flex-end;
+  border: 0px solid;
+  background-color: transparent;
+  padding: 0;
+  padding-left: 1.75%;
+  width: 550px;
+  height: 63px;
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.entry__checkbox {
+  align-self: center;
+  width: 7%;
+  height: 30px;
+  margin: 0 .5rem;
+  border: 2px solid #DFDFDF;
+  border-width: 0 3px 3px 0;
+}
+
+.entry__label {
+  align-self: center;
+  text-align: left;
+  width: 84%;
+  font-size: 24px;
+  line-height: 29px;
+  font-weight: 300;
+  margin: 0 .5rem;
+  border: 0;
+  outline: none;
+}
+
+.entry__button {
+  background-color: transparent;
+  cursor: pointer;
+  outline: none;
+  font-weight: bold;
+  align-self: center;
+  width: 10%;
+  height: 100%;
+  text-align: center;
+  font-size: 24px;
+  font-weight: lighter;
+  color: #D65959;
+}
+
+.todo-footer__label {
+  width: 34%;
+  text-align: left;
+  padding-left: 3%;
+}
+
+.todo-footer__label, .todo-footer__button {
+  align-self: center;
+  font-family: Helvetica Neue;
+  font-style: normal;
+  font-weight: 200;
+  font-size: 14px;
+}
+
+.button-all {
+  width: 7%;
+} 
+
+.button-active {
+  width: 10%;
+} 
+
+.button-completed {
+  width: 15%;
+}
+
+.button-clear {
+  width: 34%;
+  text-align: right;
+  padding-right: 3%;
+}
+
+.button, .todo-footer__label {
+  border-radius: 5px;
+  border: 0px;
+  background-color: transparent;
+  outline: none;
+}
+
+.button:hover {
+  cursor: pointer;
+  background-color: transparent;
+}
+
+#chevron {
+  cursor: pointer;
+  outline: none;
+  border-radius: 0;
+  transform: rotate(90deg);
+  align-self: center;
+  padding-bottom: 2%;
+  color: rgba(0, 0, 0, 0.4);
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 30px;
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: extra-expanded;
+  background-color: transparent;
 }
