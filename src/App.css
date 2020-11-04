@@ -152,3 +152,46 @@ form, .todo-list__entry, .todo-footer {
   font-stretch: extra-expanded;
   background-color: transparent;
 }
+
+@media only screen and (max-width: 600px) {
+  body, 
+  form, 
+  .todo-list__entry, 
+  .todo-list, .todo-footer {
+    width: 100vw;
+  }
+
+  .todo-footer__label, .todo-footer__button {
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .entry__label, .input, .input:placeholder-shown, .input:focus, textarea:focus {
+    font-size: 20px;
+  }
+
+  .todo-footer__label {
+    width: 20%;
+  }
+
+  .button-all {
+    width: 10%;
+  } 
+  
+  .button-active {
+    width: 15%;
+  } 
+  
+  .button-completed {
+    width: 20%;
+  }  
+  
+  .button-clear {
+    width: 30%;
+  }
+
+  #chevron {
+    padding-bottom: 0;
+    padding-left: 13px;
+  }
+}
